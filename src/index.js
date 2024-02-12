@@ -36,7 +36,7 @@ let marker, circle, zoomed;
 
 
 function initLoc() {
-  get(child(dbRef, `users/38BDCD1000CBCEF8`)).then((snapshot) => {
+  get(child(dbRef, `users/4A9599C406D3B198`)).then((snapshot) => {
     if (snapshot.exists()) {
       latCoord = Number(snapshot.val().lat)
       longCoord = Number(snapshot.val().lang)
