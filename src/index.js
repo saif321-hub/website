@@ -1,5 +1,7 @@
 import { initializeApp } from 'firebase/app';
-import { child, get, getDatabase, onValue, ref } from 'firebase/database';
+import { getDatabase, onValue, ref } from 'firebase/database';
+
+
 const firebaseConfig = {
   apiKey: "AIzaSyDrcMpNuWXfGWDf681jN4Bn48wO4PZeq0k",
   authDomain: "newatt-71b8b.firebaseapp.com",
@@ -9,15 +11,42 @@ const firebaseConfig = {
   messagingSenderId: "848811892519",
   appId: "1:848811892519:web:71f9203863ab3cc3059302"
 };
+
+
 initializeApp(firebaseConfig)
 let ID = document.getElementById('ID')
 let lang = document.getElementById('lang')
 let lat = document.getElementById('lat')
 let time = document.getElementById('time')
+let btn = document.getElementById('btn')
+let x = document.getElementById("myText").value;
+let btn2 = document.getElementById('btn2')
+
 
 const db = getDatabase()
-const refC = ref(db, 'users/4A9599C406D3B198')
+let refC = ref(db, `users/`)
 const dbRef = ref(getDatabase());
+
+
+let unsubscribe;
+
+btn.addEventListener("click", (event) => {
+  x = document.getElementById("myText").value;
+  refC = ref(db, `users/${x}`)
+  if (x == '') {
+    window.alert("can nor be empty");
+  }
+  else
+    console.log(x);
+
+  liveMark()
+});
+
+
+btn2.addEventListener('click', (event) => {
+  unsubscribe()
+})
+
 
 var map = L.map('map').setView([51.505, -0.09], 13);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -35,24 +64,6 @@ let marker, circle, zoomed;
 
 
 
-function initLoc() {
-  get(child(dbRef, `users/4A9599C406D3B198`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      latCoord = Number(snapshot.val().lat)
-      longCoord = Number(snapshot.val().lang)
-      console.log(latCoord, longCoord);
-    } else {
-      console.log("No data available");
-    }
-  }).catch((error) => {
-    console.error(error);
-  });
-}
-initLoc();
-
-
-
-
 function hopso() {
   onValue(refC, (snapshot) => {
     ID.textContent = snapshot.val().ID
@@ -62,14 +73,11 @@ function hopso() {
 
   })
 }
-hopso()
-
-
 
 
 
 function liveMark() {
-  onValue(refC, (snapshot) => {
+  unsubscribe = onValue(refC, (snapshot) => {
     latCoord = Number(snapshot.val().lat)
     longCoord = Number(snapshot.val().lang)
     if (marker) {
@@ -83,8 +91,7 @@ function liveMark() {
       zoomed = map.fitBounds(circle.getBounds())
     }
     map.setView([latCoord, longCoord])
-    console.log(latCoord, longCoord);
   })
 }
-liveMark()
+
 
