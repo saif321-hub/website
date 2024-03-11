@@ -19,6 +19,7 @@ let lang = document.getElementById('lang')
 let lat = document.getElementById('lat')
 let time = document.getElementById('time')
 let btn = document.getElementById('btn')
+let filed = document.getElementById('myText')
 let x = document.getElementById("myText").value;
 let btn2 = document.getElementById('btn2')
 
@@ -29,34 +30,46 @@ const dbRef = ref(getDatabase());
 
 
 let unsubscribe;
-
+btn2.disabled = true;
 btn.addEventListener("click", (event) => {
   x = document.getElementById("myText").value;
   refC = ref(db, `users/${x}`)
   if (x == '') {
     window.alert("can nor be empty");
   }
-  else
+  else {
     console.log(x);
-
-  liveMark()
+    liveMark()
+    btn.disabled = true;
+    btn2.disabled = false;
+  }
 });
 
 
 btn2.addEventListener('click', (event) => {
   unsubscribe()
+  btn.disabled = false;
+  filed.value = '';
+  map.removeLayer(marker)
+  map.removeLayer(circle)
 })
 
 
-var map = L.map('map').setView([51.505, -0.09], 13);
+var map = L.map('map',
+  {
+    zoomControl: false,
+  }).setView([33.32190556525824, 44.37579788850953], 13);
+
+
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
-  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 }).addTo(map);
 
-L.marker([44.5, -0.09]).addTo(map);
 
-
+L.control.zoom({
+  position: 'bottomleft'
+}).addTo(map);
 
 
 let latCoord, longCoord;
@@ -84,7 +97,7 @@ function liveMark() {
       map.removeLayer(marker);
       map.removeLayer(circle);
     }
-    marker = L.marker([latCoord, longCoord]).addTo(map)
+    marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${snapshot.val().ID}<h1/>`)
     circle = L.circle([latCoord, longCoord], 3).addTo(map)
 
     if (!zoomed) {

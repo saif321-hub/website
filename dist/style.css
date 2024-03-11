@@ -1,8 +1,34 @@
-#map {
+#map,
+body {
     height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-button {
-    height: 50px;
-    width: 100px;
+.btn {
+    z-index: 600;
+    height: 65px;
+    width: 65px;
+    border-radius: 50%;
+    padding: 5px;
+    margin: 5px;
+
+}
+
+.btn.stop {}
+
+.text {
+    z-index: 600;
+    width: 300px;
+    height: 30px;
+
+}
+
+.con {
+    z-index: 600;
+    width: 100%;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
