@@ -54,6 +54,7 @@ btn2.addEventListener('click', (event) => {
   filed.value = '';
   map.removeLayer(marker)
   map.removeLayer(circle)
+  map.removeAllLayers()
 })
 
 btn3.addEventListener('click', (event) => {
@@ -67,10 +68,11 @@ btn3.addEventListener('click', (event) => {
   }
 
 })
-var map = L.map('map',
-  {
-    zoomControl: false,
-  }).setView([33.32190556525824, 44.37579788850953], 13);
+
+
+//////////
+
+var map = L.map('map').setView([33.32190556525824, 44.37579788850953], 13);
 
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -79,9 +81,29 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 
-L.control.zoom({
-  position: 'bottomleft'
-}).addTo(map);
+var drawnItems = new L.FeatureGroup();
+map.addLayer(drawnItems);
+
+
+var drawControl = new L.Control.Draw({
+  position: 'bottomleft',
+  edit: {
+    featureGroup: drawnItems,
+    remove: true,
+  },
+
+})
+map.addControl(drawControl);
+
+map.on("draw:created", function (e) {
+  var type = e.layertype;
+  var layer = e.layer;
+  console.log(e);
+  drawnItems.addLayer(layer);
+})
+
+/////////
+
 
 
 let latCoord, longCoord;
