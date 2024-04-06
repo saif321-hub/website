@@ -39,7 +39,6 @@ btn.addEventListener("click", (event) => {
     window.alert("can nor be empty");
   }
   else {
-    console.log(x);
     liveMark()
     btn.disabled = true;
     btn2.disabled = false;
@@ -81,7 +80,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 
-var drawnItems = new L.FeatureGroup();
+/*var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
 
 
@@ -98,18 +97,18 @@ map.addControl(drawControl);
 map.on("draw:created", function (e) {
   var type = e.layertype;
   var layer = e.layer;
-  console.log(e);
+  //console.log(e);
   drawnItems.addLayer(layer);
 })
-
+*/
 /////////
 
 
 
-let latCoord, longCoord;
+let latCoord, longCoord, LastestTime, curruntTime, id;
 let marker, circle, zoomed;
 
-
+curruntTime = new Date()
 
 function hopso() {
   onValue(refC, (snapshot) => {
@@ -127,11 +126,13 @@ function liveMark() {
   unsubscribe = onValue(refC, (snapshot) => {
     latCoord = Number(snapshot.val().lat)
     longCoord = Number(snapshot.val().lang)
+    LastestTime = snapshot.val().time;
+    id = snapshot.val().ID;
     if (marker) {
       map.removeLayer(marker);
       map.removeLayer(circle);
     }
-    marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${snapshot.val().ID}<h1/>`)
+    marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${id}<h1/>  <h3>${LastestTime}<h3/>`)
     circle = L.circle([latCoord, longCoord], 3).addTo(map)
 
     if (!zoomed) {
@@ -149,13 +150,12 @@ function groupLive() {
     let devId = snapshot.val().ID;
     for (let i = 0; i < idList.length; i++) {
       if (idList[i] == devId) {
-        window.alert("already in track");
+        //window.alert("already in track");
         break;
       }
       else {
         idList.push(devId);
-        console.log(devId);
-        marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${snapshot.val().ID}<h1/>`)
+        marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${id}<h1/>  <h3>${LastestTime}<h3/>`)
         circle = L.circle([latCoord, longCoord], 3).addTo(map)
 
         if (!zoomed) {
@@ -164,6 +164,17 @@ function groupLive() {
       }
     }
 
-    //map.setView([latCoord, longCoord])
+
   })
 }
+let ref2 = ref(db, `users/`)
+function getList() {
+  onValue(ref2, (snapshot) => {
+    snapshot.forEach((childSnapshot) => {
+      console.log(childSnapshot.val().ID);
+    })
+  })
+}
+getList()
+
+
