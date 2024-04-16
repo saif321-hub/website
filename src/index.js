@@ -24,6 +24,7 @@ let x = document.getElementById("myText").value;
 let btn2 = document.getElementById('btn2')
 let btn3 = document.getElementById('btn3')
 
+btn3.hidden=true;
 
 const db = getDatabase()
 let refC = ref(db, `users/`)
@@ -33,13 +34,15 @@ const dbRef = ref(getDatabase());
 let unsubscribe;
 btn2.disabled = true;
 btn.addEventListener("click", (event) => {
-  x = document.getElementById("myText").value;
+  x = document.getElementById("myText").value.toUpperCase();
+  console.log(x);
   refC = ref(db, `users/${x}`)
   if (x == '') {
     window.alert("can nor be empty");
   }
   else {
     liveMark()
+    select.disabled=true
     btn.disabled = true;
     btn2.disabled = false;
   }
@@ -48,12 +51,12 @@ btn.addEventListener("click", (event) => {
 
 btn2.addEventListener('click', (event) => {
   unsubscribe()
+  select.disabled=false
   btn.disabled = false;
   btn2.disabled = true;
   filed.value = '';
   map.removeLayer(marker)
   map.removeLayer(circle)
-  map.removeAllLayers()
 })
 
 btn3.addEventListener('click', (event) => {
@@ -71,7 +74,7 @@ btn3.addEventListener('click', (event) => {
 
 //////////
 
-var map = L.map('map').setView([33.32190556525824, 44.37579788850953], 13);
+var map = L.map('map',{ zoomControl: false ,attributionControl:false}).setView([33.32190556525824, 44.37579788850953], 13);
 
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -105,7 +108,7 @@ map.on("draw:created", function (e) {
 
 
 
-let latCoord, longCoord, LastestTime, curruntTime, id;
+let latCoord, longCoord, LastestTime, curruntTime, id,speed;
 let marker, circle, zoomed;
 
 curruntTime = new Date()
@@ -127,12 +130,16 @@ function liveMark() {
     latCoord = Number(snapshot.val().lat)
     longCoord = Number(snapshot.val().lang)
     LastestTime = snapshot.val().time;
-    id = snapshot.val().ID;
+    speed=snapshot.val().sped;
+    id = snapshot.val().ID.toUpperCase();
+    console.log(speed);
+    speed=Math.round((speed*3600)/1000);
+    
     if (marker) {
       map.removeLayer(marker);
       map.removeLayer(circle);
     }
-    marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${id}<h1/>  <h3>${LastestTime}<h3/>`)
+    marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${id}<h1/>  <h3>${LastestTime}<h3/> <h3>Speed ${speed} KM<h3/>`)
     circle = L.circle([latCoord, longCoord], 3).addTo(map)
 
     if (!zoomed) {
@@ -167,14 +174,28 @@ function groupLive() {
 
   })
 }
+
+let idAry=[];
 let ref2 = ref(db, `users/`)
 function getList() {
   onValue(ref2, (snapshot) => {
     snapshot.forEach((childSnapshot) => {
-      console.log(childSnapshot.val().ID);
+      idAry.push(childSnapshot.val().ID.toUpperCase());
     })
   })
 }
 getList()
 
-
+console.log(idAry.length);
+console.log(idAry);
+let option=``;
+setTimeout(() => {  for(var i=0;i<idAry.length;i++){
+  option+=`<option value="`+ idAry[i] +`">`+idAry[i]+"</option> "
+}
+document.getElementById('month').innerHTML=option; }, 3000);
+var select = document.getElementById("month");
+select.addEventListener("change", ()=>{
+  filed.innerText="";
+  var value = select.value;
+  filed.value=value;
+});
