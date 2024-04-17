@@ -14,7 +14,16 @@ body {
     margin: 5px;
 
 }
+.btnStop{
+    z-index: 600;
+    height: 65px;
+    width: 65px;
+    border-radius: 50%;
+    padding: 5px;
+    margin: 5px;
+    background-color: crimson;
 
+}
 
 
 .text {

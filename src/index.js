@@ -23,29 +23,64 @@ let filed = document.getElementById('myText')
 let x = document.getElementById("myText").value;
 let btn2 = document.getElementById('btn2')
 let btn3 = document.getElementById('btn3')
-
+var select = document.getElementById("month");
 btn3.hidden=true;
 
 const db = getDatabase()
 let refC = ref(db, `users/`)
 const dbRef = ref(getDatabase());
 
+//////
+let devAry=[];
+let idAry=[];
+let ref2 = ref(db, `users/`)
+function getList() {
+  onValue(ref2, (snapshot) => {
+    snapshot.forEach((childSnapshot) => {
+      let device={
+        id:`${childSnapshot.val().ID.toUpperCase()}`,
+        name:`${childSnapshot.val().name}`
+      }
+      devAry.push(device)
+      idAry.push(childSnapshot.val().ID.toUpperCase());
+    })
+  })
+}
+getList()
+console.log(devAry);
+let option=``;
+setTimeout(() => {  for(var i=0;i<devAry.length;i++){
+  option+=`<option value="`+ devAry[i].id +`">`+`<span>${devAry[i].name} :</span>`+devAry[i].id+"</option> "
+}
+document.getElementById('month').innerHTML=option; }, 3000);
+
+select.addEventListener("change", ()=>{
+  filed.innerText="";
+  var value = select.value;
+  filed.value=value;
+});
+///////////
+
+
 
 let unsubscribe;
 btn2.disabled = true;
 btn.addEventListener("click", (event) => {
   x = document.getElementById("myText").value.toUpperCase();
-  console.log(x);
   refC = ref(db, `users/${x}`)
-  if (x == '') {
-    window.alert("can nor be empty");
-  }
-  else {
-    liveMark()
-    select.disabled=true
-    btn.disabled = true;
-    btn2.disabled = false;
-  }
+if(idAry.includes(x)){
+  liveMark()
+  select.disabled=true
+  btn.disabled = true;
+  btn2.disabled = false;
+  filed.disabled=true;
+  //btn.classList.add("btnStop");
+  //btn.innerText="Stop"
+}
+else{
+  window.alert("not found");
+}
+
 });
 
 
@@ -55,6 +90,7 @@ btn2.addEventListener('click', (event) => {
   btn.disabled = false;
   btn2.disabled = true;
   filed.value = '';
+  filed.disabled=false;
   map.removeLayer(marker)
   map.removeLayer(circle)
 })
@@ -108,21 +144,8 @@ map.on("draw:created", function (e) {
 
 
 
-let latCoord, longCoord, LastestTime, curruntTime, id,speed;
+let latCoord, longCoord, LastestTime, DeVname, id,speed;
 let marker, circle, zoomed;
-
-curruntTime = new Date()
-
-function hopso() {
-  onValue(refC, (snapshot) => {
-    ID.textContent = snapshot.val().ID
-    lang.textContent = snapshot.val().lang
-    lat.textContent = snapshot.val().lat
-    time.textContent = snapshot.val().time
-
-  })
-}
-
 
 
 function liveMark() {
@@ -132,14 +155,14 @@ function liveMark() {
     LastestTime = snapshot.val().time;
     speed=snapshot.val().sped;
     id = snapshot.val().ID.toUpperCase();
-    console.log(speed);
+    DeVname=snapshot.val().name;
     speed=Math.round((speed*3600)/1000);
     
     if (marker) {
       map.removeLayer(marker);
       map.removeLayer(circle);
     }
-    marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${id}<h1/>  <h3>${LastestTime}<h3/> <h3>Speed ${speed} KM<h3/>`)
+    marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${DeVname}<h1/> <h2>${id}</h2>  <h3>${LastestTime}<h3/> <h3>Speed ${speed} KM<h3/>`)
     circle = L.circle([latCoord, longCoord], 3).addTo(map)
 
     if (!zoomed) {
@@ -175,27 +198,3 @@ function groupLive() {
   })
 }
 
-let idAry=[];
-let ref2 = ref(db, `users/`)
-function getList() {
-  onValue(ref2, (snapshot) => {
-    snapshot.forEach((childSnapshot) => {
-      idAry.push(childSnapshot.val().ID.toUpperCase());
-    })
-  })
-}
-getList()
-
-console.log(idAry.length);
-console.log(idAry);
-let option=``;
-setTimeout(() => {  for(var i=0;i<idAry.length;i++){
-  option+=`<option value="`+ idAry[i] +`">`+idAry[i]+"</option> "
-}
-document.getElementById('month').innerHTML=option; }, 3000);
-var select = document.getElementById("month");
-select.addEventListener("change", ()=>{
-  filed.innerText="";
-  var value = select.value;
-  filed.value=value;
-});
