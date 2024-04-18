@@ -38,8 +38,9 @@ function getList() {
   onValue(ref2, (snapshot) => {
     snapshot.forEach((childSnapshot) => {
       let device={
-        id:`${childSnapshot.val().ID.toUpperCase()}`,
-        name:`${childSnapshot.val().name}`
+        
+        id: childSnapshot.val().ID.toUpperCase(),
+        name: childSnapshot.val().name
       }
       devAry.push(device)
       idAry.push(childSnapshot.val().ID.toUpperCase());
@@ -48,9 +49,14 @@ function getList() {
 }
 getList()
 console.log(devAry);
-let option=``;
+let option=`<option class="placeHold" value="" disabled selected>Select your option</option>`;
 setTimeout(() => {  for(var i=0;i<devAry.length;i++){
-  option+=`<option value="`+ devAry[i].id +`">`+`<span>${devAry[i].name} :</span>`+devAry[i].id+"</option> "
+  if(devAry[i].name==undefined){
+  option+=`<option  value="`+ devAry[i].id +`">`+`<span>unknown  :</span>`+devAry[i].id+"</option> "
+  }
+  else{
+    option+=`<option  value="`+ devAry[i].id +`">`+`<span>${devAry[i].name} :</span>`+devAry[i].id+"</option> "
+  }
 }
 document.getElementById('month').innerHTML=option; }, 3000);
 
@@ -77,10 +83,12 @@ if(idAry.includes(x)){
   //btn.classList.add("btnStop");
   //btn.innerText="Stop"
 }
+else if(x==""){
+  window.alert("cant be empty");
+}
 else{
   window.alert("not found");
 }
-
 });
 
 

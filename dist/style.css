@@ -46,6 +46,12 @@ body {
     width: 200px;
     background-color: rgba(12, 47, 206, 0.658);
     color: white;
+    margin-right: 30px;
+}
+.placeHold:disabled{
+    text-align:center ;
+    color: rgba(255, 255, 255,1);
+    
 }
 
 #month:disabled{
