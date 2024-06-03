@@ -14,28 +14,33 @@ const firebaseConfig = {
 
 
 initializeApp(firebaseConfig)
-let ID = document.getElementById('ID')
-let lang = document.getElementById('lang')
-let lat = document.getElementById('lat')
-let time = document.getElementById('time')
+
 let btn = document.getElementById('btn')
 let filed = document.getElementById('myText')
 let x = document.getElementById("myText").value;
 let btn2 = document.getElementById('btn2')
-let btn3 = document.getElementById('btn3')
-var select = document.getElementById("month");
-btn3.hidden=true;
+var select = document.getElementById("menuList");
+
 
 const db = getDatabase()
 let refC = ref(db, `users/`)
-const dbRef = ref(getDatabase());
 
-//////
+
+//SETUP THE MAP
+var map = L.map('map',{ zoomControl: false ,attributionControl:false}).setView([33.32190556525824, 44.37579788850953], 13);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+}).addTo(map);
+
+
+
 let devAry=[];
 let idAry=[];
-let ref2 = ref(db, `users/`)
+
+
+//FILLING THE ARRAYS
 function getList() {
-  onValue(ref2, (snapshot) => {
+  onValue(refC, (snapshot) => {
     snapshot.forEach((childSnapshot) => {
       let device={
         
@@ -47,9 +52,14 @@ function getList() {
     })
   })
 }
+
 getList()
 console.log(devAry);
+
+
+//LOAD THE LIST
 let option=`<option class="placeHold" value="" disabled selected>Select your option</option>`;
+
 setTimeout(() => {  for(var i=0;i<devAry.length;i++){
   if(devAry[i].name==undefined){
   option+=`<option  value="`+ devAry[i].id +`">`+`<span>unknown  :</span>`+devAry[i].id+"</option> "
@@ -58,19 +68,21 @@ setTimeout(() => {  for(var i=0;i<devAry.length;i++){
     option+=`<option  value="`+ devAry[i].id +`">`+`<span>${devAry[i].name} :</span>`+devAry[i].id+"</option> "
   }
 }
-document.getElementById('month').innerHTML=option; }, 3000);
 
+select.innerHTML=option; }, 3000);
+
+
+//LIST SELECTION CHANGE
 select.addEventListener("change", ()=>{
   filed.innerText="";
   var value = select.value;
   filed.value=value;
 });
-///////////
-
-
 
 let unsubscribe;
 btn2.disabled = true;
+
+// START BUTTON
 btn.addEventListener("click", (event) => {
   x = document.getElementById("myText").value.toUpperCase();
   refC = ref(db, `users/${x}`)
@@ -80,8 +92,6 @@ if(idAry.includes(x)){
   btn.disabled = true;
   btn2.disabled = false;
   filed.disabled=true;
-  //btn.classList.add("btnStop");
-  //btn.innerText="Stop"
 }
 else if(x==""){
   window.alert("cant be empty");
@@ -91,7 +101,7 @@ else{
 }
 });
 
-
+// STOP BUTTON
 btn2.addEventListener('click', (event) => {
   unsubscribe()
   select.disabled=false
@@ -103,59 +113,11 @@ btn2.addEventListener('click', (event) => {
   map.removeLayer(circle)
 })
 
-btn3.addEventListener('click', (event) => {
-  x = document.getElementById("myText").value;
-  refC = ref(db, `users/${x}`)
-  if (x == '') {
-    window.alert("can nor be empty");
-  }
-  else {
-    groupLive();
-  }
-
-})
-
-
-//////////
-
-var map = L.map('map',{ zoomControl: false ,attributionControl:false}).setView([33.32190556525824, 44.37579788850953], 13);
-
-
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-}).addTo(map);
-
-
-/*var drawnItems = new L.FeatureGroup();
-map.addLayer(drawnItems);
-
-
-var drawControl = new L.Control.Draw({
-  position: 'bottomleft',
-  edit: {
-    featureGroup: drawnItems,
-    remove: true,
-  },
-
-})
-map.addControl(drawControl);
-
-map.on("draw:created", function (e) {
-  var type = e.layertype;
-  var layer = e.layer;
-  //console.log(e);
-  drawnItems.addLayer(layer);
-})
-*/
-/////////
-
-
 
 let latCoord, longCoord, LastestTime, DeVname, id,speed;
 let marker, circle, zoomed;
 
-
+//UPDATE FUNCTION
 function liveMark() {
   unsubscribe = onValue(refC, (snapshot) => {
     latCoord = Number(snapshot.val().lat)
@@ -170,8 +132,10 @@ function liveMark() {
       map.removeLayer(marker);
       map.removeLayer(circle);
     }
-    marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${DeVname}<h1/> <h2>${id}</h2>  <h3>${LastestTime}<h3/> <h3>Speed ${speed} KM<h3/>`)
+    marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${DeVname}<h1/> <h2>${id}</h2>  <h3>${LastestTime}<h3/> <h3>Speed ${speed} KM<h3/>`).openPopup();
     circle = L.circle([latCoord, longCoord], 3).addTo(map)
+
+    
 
     if (!zoomed) {
       zoomed = map.fitBounds(circle.getBounds())
@@ -180,29 +144,4 @@ function liveMark() {
   })
 }
 
-const idList = ['helo'];
-function groupLive() {
-  onValue(refC, (snapshot) => {
-    latCoord = Number(snapshot.val().lat)
-    longCoord = Number(snapshot.val().lang)
-    let devId = snapshot.val().ID;
-    for (let i = 0; i < idList.length; i++) {
-      if (idList[i] == devId) {
-        //window.alert("already in track");
-        break;
-      }
-      else {
-        idList.push(devId);
-        marker = L.marker([latCoord, longCoord]).addTo(map).bindPopup(`<h1>${id}<h1/>  <h3>${LastestTime}<h3/>`)
-        circle = L.circle([latCoord, longCoord], 3).addTo(map)
-
-        if (!zoomed) {
-          zoomed = map.fitBounds(circle.getBounds())
-        }
-      }
-    }
-
-
-  })
-}
 
